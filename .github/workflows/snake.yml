@@ -6,18 +6,17 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write              # глобально
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Генерим змею (тёмная палитра)
+      # 1) Генерим змею в ./output
       - uses: Platane/snk@v3
         with:
           github_user_name: blvckcatswag
@@ -25,9 +24,10 @@ jobs:
             output/snake.svg
             output/snake-dark.svg?palette=github-dark
 
-      # Оборачиваем змею в DOOM-панель шириной 680
-      - name: Wrap snake into DOOM HUD
+      # 2) Собираем наш HUD в отдельную папку ./public (чтобы не ловить Permission denied)
+      - name: Build DOOM HUD with snake
         run: |
+          mkdir -p public
           python3 - << 'PY'
           import re, pathlib
 
@@ -96,14 +96,17 @@ jobs:
             </g>
           </svg>
           '''
-          pathlib.Path("output/snake-hud.svg").write_text(svg, encoding="utf-8")
-          print("snake-hud.svg written")
+          pathlib.Path("public/snake-hud.svg").write_text(svg, encoding="utf-8")
+          # заодно положим и саму змею, если вдруг захочешь её отдельно
+          pathlib.Path("public/snake-dark.svg").write_text(pathlib.Path("output/snake-dark.svg").read_text(encoding="utf-8"), encoding="utf-8")
+          print("public/snake-hud.svg written")
           PY
 
+      # 3) Публикуем только public в ветку output
       - name: Push assets to output branch
         uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: output
-          build_dir: output
+          build_dir: public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
