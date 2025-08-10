@@ -12,6 +12,7 @@ jobs:
       contents: write
 
     steps:
+      # 1) Генерим обычную змею (светлую и тёмную)
       - uses: Platane/snk@v3
         with:
           github_user_name: blvckcatswag
@@ -19,10 +20,102 @@ jobs:
             output/snake.svg
             output/snake-dark.svg?palette=github-dark
 
-      - name: Push snake to repo
+      # 2) Оборачиваем змею в неоновый DOOM-HUD (встраиваем анимацию внутрь панели)
+      - name: Wrap snake into DOOM HUD
+        run: |
+          python3 - << 'PY'
+          import re, pathlib
+
+          src = pathlib.Path("output/snake-dark.svg").read_text(encoding="utf-8")
+
+          # вытащим размеры исходной змеи (viewBox или width/height)
+          m = re.search(r'viewBox="0 0 ([0-9.]+) ([0-9.]+)"', src)
+          if m:
+            sw, sh = float(m.group(1)), float(m.group(2))
+          else:
+            mw = re.search(r'width="([0-9.]+)"', src)
+            mh = re.search(r'height="([0-9.]+)"', src)
+            sw, sh = float(mw.group(1) if mw else 1000), float(mh.group(1) if mh else 200)
+
+          # вытащим внутренности <svg>...</svg> со стилями/анимациями (важно для живости)
+          inner = src
+          # срежем xml декларацию
+          inner = re.sub(r'^\s*<\?xml[^>]*>\s*', '', inner)
+          # снимем outer <svg ...> ... </svg>, оставив содержимое
+          inner = re.sub(r'^\s*<svg[^>]*>', '', inner, count=1, flags=re.S)
+          inner = re.sub(r'</svg>\s*$', '', inner, count=1, flags=re.S)
+
+          # размеры итоговой панели
+          OUT_W = 680
+          OUT_H = 300           # высота панели целиком
+          FRAME_PAD = 8
+          # область под змею внутри панели
+          Z_X, Z_Y = 16, 150
+          Z_W, Z_H = OUT_W - 2*Z_X, 120
+
+          # коэффициенты масштабирования змеи под окно Z_W x Z_H
+          sx = Z_W / sw
+          sy = Z_H / sh
+
+          svg = f'''<?xml version="1.0" encoding="UTF-8"?>
+          <svg width="{OUT_W}" height="{OUT_H}" viewBox="0 0 {OUT_W} {OUT_H}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g" x1="0" x2="1">
+                <stop offset="0%" stop-color="#FF003C"/>
+                <stop offset="50%" stop-color="#7A00FF"/>
+                <stop offset="100%" stop-color="#00FFF7"/>
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2.2" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect width="4" height="1" fill="#ffffff12"/>
+              </pattern>
+            </defs>
+
+            <!-- Внешняя рамка -->
+            <rect x="6" y="6" width="{OUT_W-12}" height="{OUT_H-12}" rx="14" ry="14" fill="#0b0c10" stroke="#FF003C" stroke-width="2"/>
+            <rect x="6" y="6" width="{OUT_W-12}" height="{OUT_H-12}" rx="14" ry="14" fill="url(#scan)"/>
+
+            <!-- Шапка HUD -->
+            <rect x="{FRAME_PAD+6}" y="22" width="{OUT_W-2*(FRAME_PAD+6)}" height="28" rx="10" fill="#111" stroke="#7A00FF"/>
+            <text x="{FRAME_PAD+16}" y="41" fill="#9AFF9A" font-family="Share Tech Mono, Consolas, monospace" font-size="14">
+              M: 0000  |  H: 100%  |  A: 75%
+            </text>
+
+            <!-- Полоса "здоровья" -->
+            <rect x="{FRAME_PAD+16}" y="66" width="{OUT_W-2*(FRAME_PAD+16)}" height="18" rx="6" fill="#111"/>
+            <rect x="{FRAME_PAD+16}" y="66" width="{OUT_W-2*(FRAME_PAD+16)-60}" height="18" rx="6" filter="url(#glow)">
+              <animate attributeName="width" values="{OUT_W-2*(FRAME_PAD+16)-60};{OUT_W-2*(FRAME_PAD+16)-20};{OUT_W-2*(FRAME_PAD+16)-60}" dur="3s" repeatCount="indefinite"/>
+              <animate attributeName="fill"  values="#00FF88;#00FFF7;#00FF88" dur="3s" repeatCount="indefinite"/>
+            </rect>
+
+            <!-- Консольные строки -->
+            <text x="{FRAME_PAD+16}" y="98" fill="#8EF0FF" font-family="Share Tech Mono, Consolas, monospace" font-size="13">&gt;&gt; System online...</text>
+            <text x="{FRAME_PAD+16}" y="118" fill="#8EF0FF" font-family="Share Tech Mono, Consolas, monospace" font-size="13">&gt;&gt; Scanning for bugs...</text>
+            <text x="{OUT_W/2}" y="118" fill="#FF9AB3" font-family="Share Tech Mono, Consolas, monospace" font-size="13" text-anchor="middle">
+              Threats eliminated.
+              <animate attributeName="opacity" values="0.6;1;0.6" dur="1.8s" repeatCount="indefinite"/>
+            </text>
+
+            <!-- Окно для змеи -->
+            <rect x="{Z_X}" y="{Z_Y-6}" width="{Z_W}" height="{Z_H+12}" rx="10" fill="#0f1015" stroke="#7A00FF" opacity="0.35"/>
+            <g transform="translate({Z_X}, {Z_Y}) scale({sx},{sy})">
+              {inner}
+            </g>
+          </svg>
+          '''
+          pathlib.Path("output/snake-hud.svg").write_text(svg, encoding="utf-8")
+          print("snake-hud.svg written")
+          PY
+
+      # 3) Публикуем всё в ветку output
+      - name: Push assets to output branch
         uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: output
           build_dir: output
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
