@@ -58,7 +58,10 @@
   <!-- замени USERNAME на свой ник. Путь верный, если doom_hud.svg лежит в корне репозитория-профиля -->
   <img src="https://raw.githubusercontent.com/blvckcatswag/blvckcatswag/main/doom_hud.svg" width="680" alt="doom hud"/>
 </p>
-
+<p align="center">
+  <!-- Змейка по твоим коммитам -->
+  <img src="https://raw.githubusercontent.com/blvckcatswag/blvckcatswag/output/snake-dark.svg" alt="contrib snake" width="720"/>
+</p>
 ---
 
 ## 📬 Contacts
