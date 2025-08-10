@@ -62,7 +62,7 @@
   <!-- Змейка по твоим коммитам -->
   <img src="https://raw.githubusercontent.com/blvckcatswag/blvckcatswag/output/snake-dark.svg" alt="contrib snake" width="720"/>
 </p>
----
+<br/>
 
 ## 📬 Contacts
 <p align="center">
