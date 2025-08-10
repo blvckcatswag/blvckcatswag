@@ -1,10 +1,10 @@
-<!-- Profile: Neon / Cyberpunk / Mr. Robot. Replace ALL CAPS placeholders. -->
+
 
 <h1 align="center">
   <img src="https://readme-typing-svg.herokuapp.com?font=Share+Tech+Mono&size=28&duration=2600&pause=900&color=00FFF7&center=true&vCenter=true&width=700&lines=Aleksei+—+QA+Engineer;Python+Automation+%7C+Pytest+%7C+Selenium;Future+SDET" alt="typing" />
 </h1>
 
-<!-- Neon banner -->
+
 <p align="center">
   <img src="https://img.shields.io/badge/QA-AUTOMATION-FF003C?style=for-the-badge&labelColor=0a0a0f">
   <img src="https://img.shields.io/badge/PYTHON-00FFF7?style=for-the-badge&labelColor=0a0a0f">
@@ -51,18 +51,14 @@
 
 ---
 
+
 ## 💾 DOOM HUD
-<!-- ВАЖНО: этот SVG должен быть отдельным файлом. 
-     Ссылка ниже должна вести на RAW-версию, иначе GitHub покажет мусор. -->
+
 <p align="center">
-  <!-- замени USERNAME на свой ник. Путь верный, если doom_hud.svg лежит в корне репозитория-профиля -->
-  <img src="https://raw.githubusercontent.com/blvckcatswag/blvckcatswag/main/doom_hud.svg" width="680" alt="doom hud"/>
+ 
+  <img src="https://raw.githubusercontent.com/blvckcatswag/blvckcatswag/output/snake-hud.svg" width="680" alt="doom hud with snake"/>
 </p>
-<p align="center">
-  <!-- Змейка по твоим коммитам -->
-  <img src="https://raw.githubusercontent.com/blvckcatswag/blvckcatswag/output/snake-dark.svg" alt="contrib snake" width="720"/>
-</p>
-<br/>
+
 
 ## 📬 Contacts
 <p align="center">
